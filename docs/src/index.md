@@ -6,9 +6,11 @@ Beyn.jl solves nonlinear eigenvalue problems
 T(\lambda)\,x = 0, \qquad x \neq 0,
 ```
 
-where ``T`` is an ``n \times n`` matrix-valued function that is analytic near
-the unit circle. It uses Beyn's contour-integral method to find every
-eigenvalue ``\lambda`` with ``|\lambda| < 1``, together with an eigenvector.
+where ``T`` is an ``n \times n`` matrix-valued function that is analytic inside
+an ellipse (by default the unit circle). It uses Beyn's contour-integral method
+to find every eigenvalue ``\lambda`` inside the ellipse, together with an
+eigenvector. A rectangle can be given instead; the solver then searches the
+least-area ellipse around it.
 
 ## Quick start
 

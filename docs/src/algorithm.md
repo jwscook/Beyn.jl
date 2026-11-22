@@ -2,11 +2,23 @@
 
 ## Contour moments
 
-Pick ``\ell`` probe vectors, the columns of ``V \in \mathbb{C}^{n \times \ell}``,
-and compute the contour moments of ``T^{-1}`` around the unit circle ``\Gamma``:
+The contour ``\Gamma`` is an ellipse with centre ``c``, semi-axes ``a`` and
+``b``, and the ``a`` axis rotated by ``\theta`` from the real axis (a circle
+when ``a = b``). Moments are taken in the normalized coordinate
 
 ```math
-A_p = \frac{1}{2\pi i} \oint_\Gamma z^p\, T(z)^{-1} V \,dz,
+\zeta = \frac{e^{-i\theta}(z - c)}{s}, \qquad s = \max(a, b),
+```
+
+in which ``\Gamma`` is centred at 0, axis-aligned and within ``|\zeta| \le 1``,
+so the powers ``\zeta^p`` stay bounded and the moments are well scaled
+whatever the size and position of the ellipse.
+
+Pick ``\ell`` probe vectors, the columns of ``V \in \mathbb{C}^{n \times \ell}``,
+and compute the contour moments of ``T^{-1}`` around ``\Gamma``:
+
+```math
+A_p = \frac{1}{2\pi i} \oint_\Gamma \zeta^p\, T(z)^{-1} V \,d\zeta,
 \qquad p = 0, 1, \dots, 2K_{\max} - 1 .
 ```
 
@@ -21,7 +33,8 @@ A_0 = X W^H V, \qquad A_1 = X \Lambda W^H V,
 ```
 
 where the columns of ``X`` are the right eigenvectors, ``\Lambda`` is the
-diagonal matrix of eigenvalues, and ``W`` holds the left eigenvectors.
+diagonal matrix of eigenvalues in the ``\zeta`` coordinate, and ``W`` holds the
+left eigenvectors.
 
 ## Counting the eigenvalues
 
@@ -80,17 +93,21 @@ the first ``m`` singular values. Then
 B = V_0^H H_1 W_0 \Sigma_0^{-1}
 ```
 
-is an ``m \times m`` matrix with the same eigenvalues as ``T`` inside
-``\Gamma``. If ``B s = \lambda s``, the first ``n`` rows of ``V_0 s`` are an
-eigenvector of the original problem.
+is an ``m \times m`` matrix whose eigenvalues ``\zeta_k`` are those of ``T``
+inside ``\Gamma`` in the normalized coordinate; the eigenvalues are
+``\lambda_k = c + s e^{i\theta}\zeta_k``. If ``B u = \zeta_k u``, the first
+``n`` rows of ``V_0 u`` are an eigenvector of the original problem.
 
 ## Quadrature
 
-With ``z = e^{it}``, ``dz = i z\,dt``, so
+With ``z(t) = c + e^{i\theta}(a\cos t + i b\sin t)``, the normalized point is
+``\zeta(t) = (a\cos t + i b\sin t)/s``, so
 
 ```math
-A_0 = \int_0^{2\pi} T(e^{it})^{-1} V \,\frac{e^{it}}{2\pi}\,dt .
+A_p = \int_0^{2\pi} \zeta(t)^p\, T(z(t))^{-1} V \,\frac{\zeta'(t)}{2\pi i}\,dt .
 ```
+
+For the unit circle this is ``\zeta = z = e^{it}`` and ``\zeta'/i = e^{it}``.
 
 The integrand is smooth and periodic, so the trapezoid rule converges
 exponentially. The solver starts with 16 points and doubles the number of
@@ -110,7 +127,7 @@ of ``H_0`` are checked against the cutoff
 \max\left(\texttt{svdrtol}\cdot\sigma_1,\; \texttt{svdatol},\; \texttt{svdrtol}\cdot K s\right),
 ```
 
-where ``s`` approximates ``\frac{1}{2\pi}\oint \|T(z)^{-1}V\|\,|dz|``. The
+where ``s`` approximates ``\frac{1}{2\pi}\oint \|T(z)^{-1}V\|\,|d\zeta|``. The
 solver warns if, at the final ``K``:
 
 - ``\sigma_m`` is below the cutoff even at ``K = K_{\max}``: the subproblem is
@@ -120,6 +137,14 @@ solver warns if, at the final ``K``:
   more probes;
 - ``\sigma_{m+1}`` is above the cutoff: ``T`` may not be entire, or the
   quadrature is inaccurate.
+
+## Rectangles
+
+A rectangle with half-width ``w`` and half-height ``h`` is enclosed by the
+axis-aligned ellipse through its corners, ``(w/a)^2 + (h/b)^2 = 1``. Its area
+``\pi a b`` is least when ``a = \sqrt{2}\,w`` and ``b = \sqrt{2}\,h``; an
+optional margin enlarges both by ``1 + \text{margin}``. The ellipse contains
+regions outside the rectangle, so eigenvalues there are found as well.
 
 ## Requirements
 
